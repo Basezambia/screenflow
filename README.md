@@ -1,112 +1,196 @@
-# MiniKit Template
+# Kopa - Web3 Video Conferencing Platform
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with:
+A decentralized, privacy-focused video conferencing platform built with Next.js, featuring end-to-end encryption, local data storage, and anonymous mode capabilities.
 
-- [MiniKit](https://docs.base.org/builderkits/minikit/overview)
-- [OnchainKit](https://www.base.org/builders/onchainkit)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Next.js](https://nextjs.org/docs)
+![Kopa Screenshot](./public/screenshot.png)
 
-## Getting Started
+## 🚀 Features
 
-1. Install dependencies:
+### Core Video Conferencing
+- **High-Quality Video & Audio**: Crystal clear communication with advanced noise cancellation
+- **Screen Sharing**: Share your screen with participants seamlessly
+- **Recording**: Record meetings with multiple quality options
+- **Real-time Chat**: Instant messaging during meetings
+- **File Sharing**: Share files securely with participants
+- **Presentation Mode**: Upload and present slides with navigation controls
+
+### Privacy & Security
+- **End-to-End Encryption**: All communications are encrypted by default
+- **Local Data Storage**: Data stored locally by default, with optional cloud backup
+- **Anonymous Mode**: Join meetings without revealing personal information
+- **Decentralized Architecture**: Built on blockchain technology for enhanced privacy
+
+### Web3 Integration
+- **Wallet Connection**: Connect with Coinbase Wallet and other Web3 wallets
+- **Blockchain-Powered**: Leverages blockchain technology for security and decentralization
+- **OnchainKit Integration**: Built with Base's OnchainKit for seamless Web3 experience
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15, React 18, TypeScript
+- **Styling**: Tailwind CSS with custom brutal design system
+- **State Management**: Zustand
+- **WebRTC**: Simple-peer for peer-to-peer communication
+- **Real-time**: Socket.io for real-time features
+- **Web3**: OnchainKit, Wagmi, Viem
+- **Recording**: RecordRTC for meeting recording
+- **Storage**: Redis (Upstash) for session management
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Git
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/kopa.git
+cd kopa
+```
+
+2. **Install dependencies**
 ```bash
 npm install
 # or
 yarn install
-# or
-pnpm install
-# or
-bun install
 ```
 
-2. Verify environment variables, these will be set up by the `npx create-onchain --mini` command:
-
-You can regenerate the FARCASTER Account Association environment variables by running `npx create-onchain --manifest` in your project directory.
-
-The environment variables enable the following features:
-
-- Frame metadata - Sets up the Frame Embed that will be shown when you cast your frame
-- Account association - Allows users to add your frame to their account, enables notifications
-- Redis API keys - Enable Webhooks and background notifications for your application by storing users notification details
+3. **Environment Setup**
+Create a `.env.local` file in the root directory:
 
 ```bash
-# Shared/OnchainKit variables
-NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=
-NEXT_PUBLIC_URL=
-NEXT_PUBLIC_ICON_URL=
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=
+# OnchainKit Configuration
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=kopa
+NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_api_key_here
+NEXT_PUBLIC_URL=http://localhost:3000
 
-# Frame metadata
-FARCASTER_HEADER=
-FARCASTER_PAYLOAD=
-FARCASTER_SIGNATURE=
-NEXT_PUBLIC_APP_ICON=
-NEXT_PUBLIC_APP_SUBTITLE=
-NEXT_PUBLIC_APP_DESCRIPTION=
-NEXT_PUBLIC_APP_SPLASH_IMAGE=
-NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR=
-NEXT_PUBLIC_APP_PRIMARY_CATEGORY=
-NEXT_PUBLIC_APP_HERO_IMAGE=
-NEXT_PUBLIC_APP_TAGLINE=
-NEXT_PUBLIC_APP_OG_TITLE=
-NEXT_PUBLIC_APP_OG_DESCRIPTION=
-NEXT_PUBLIC_APP_OG_IMAGE=
+# Socket.io Configuration (Optional)
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 
-# Redis config
-REDIS_URL=
-REDIS_TOKEN=
+# Redis Configuration (Optional)
+REDIS_URL=your_redis_url
+REDIS_TOKEN=your_redis_token
+
+# Frame Configuration
+NEXT_PUBLIC_APP_ICON=/icon.png
+NEXT_PUBLIC_APP_SUBTITLE=Web3 Video Conferencing
+NEXT_PUBLIC_APP_DESCRIPTION=Decentralized video conferencing with privacy focus
+NEXT_PUBLIC_APP_SPLASH_IMAGE=/splash.png
+NEXT_PUBLIC_APP_HERO_IMAGE=/hero.png
 ```
 
-3. Start the development server:
+4. **Start the development server**
 ```bash
 npm run dev
 ```
 
-## Template Features
+5. **Open your browser**
+Navigate to [http://localhost:3000](http://localhost:3000)
 
-### Frame Configuration
-- `.well-known/farcaster.json` endpoint configured for Frame metadata and account association
-- Frame metadata automatically added to page headers in `layout.tsx`
+## 📱 Usage
 
-### Background Notifications
-- Redis-backed notification system using Upstash
-- Ready-to-use notification endpoints in `api/notify` and `api/webhook`
-- Notification client utilities in `lib/notification-client.ts`
+### Creating a Room
+1. Connect your Web3 wallet
+2. Enter a room name
+3. Click "Create Room"
+4. Share the generated room code with participants
 
-### Theming
-- Custom theme defined in `theme.css` with OnchainKit variables
-- Pixel font integration with Pixelify Sans
-- Dark/light mode support through OnchainKit
+### Joining a Room
+1. Connect your Web3 wallet
+2. Enter the room code
+3. Click "Join Room"
 
-### MiniKit Provider
-The app is wrapped with `MiniKitProvider` in `providers.tsx`, configured with:
-- OnchainKit integration
-- Access to Frames context
-- Sets up Wagmi Connectors
-- Sets up Frame SDK listeners
-- Applies Safe Area Insets
+### Privacy Settings
+Access privacy settings from the home page:
+- **End-to-End Encryption**: Toggle encryption on/off
+- **Data Storage**: Choose between "Local Only" or "Encrypted Cloud"
+- **Anonymous Mode**: Enable to join meetings anonymously
 
-## Customization
+### During a Meeting
+- **Video/Audio Controls**: Mute/unmute, enable/disable camera
+- **Screen Sharing**: Share your screen with participants
+- **Chat**: Send messages to all participants
+- **File Sharing**: Upload and share files
+- **Presentations**: Upload slides and present to the room
+- **Recording**: Record the meeting for later review
 
-To get started building your own frame, follow these steps:
+## 🏗️ Project Structure
 
-1. Remove the DemoComponents:
-   - Delete `components/DemoComponents.tsx`
-   - Remove demo-related imports from `page.tsx`
+```
+kopa/
+├── app/                    # Next.js app directory
+│   ├── components/         # React components
+│   │   ├── Home.tsx       # Home page with wallet connection
+│   │   ├── Room.tsx       # Main room interface
+│   │   └── ui/            # Reusable UI components
+│   ├── api/               # API routes
+│   ├── room/[id]/         # Dynamic room pages
+│   └── layout.tsx         # Root layout
+├── lib/                   # Utility libraries
+│   ├── store.ts          # Zustand state management
+│   ├── webrtc.ts         # WebRTC service
+│   ├── recording.ts      # Recording service
+│   └── utils.ts          # Utility functions
+├── public/               # Static assets
+└── styles/              # Global styles
+```
 
-2. Start building your Frame:
-   - Modify `page.tsx` to create your Frame UI
-   - Update theme variables in `theme.css`
-   - Adjust MiniKit configuration in `providers.tsx`
+## 🔧 Configuration
 
-3. Add your frame to your account:
-   - Cast your frame to see it in action
-   - Share your frame with others to start building your community
+### Privacy Settings
+The application defaults to privacy-first settings:
+- End-to-end encryption: **Enabled**
+- Data storage: **Local Only**
+- Anonymous mode: **Enabled**
 
-## Learn More
+### WebRTC Configuration
+The platform uses WebRTC for peer-to-peer communication with fallback to relay servers when needed.
 
-- [MiniKit Documentation](https://docs.base.org/builderkits/minikit/overview)
-- [OnchainKit Documentation](https://docs.base.org/builderkits/onchainkit/getting-started)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+### Recording Options
+- **Quality**: Low, Medium, High
+- **Type**: Screen, Camera, or Both
+- **Audio Source**: Microphone, System, or Both
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Configure environment variables
+4. Deploy
+
+### Manual Deployment
+```bash
+npm run build
+npm start
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [OnchainKit](https://onchainkit.xyz/) by Coinbase
+- Powered by [Base](https://base.org/) blockchain
+- UI inspired by brutal design principles
+- WebRTC implementation using [simple-peer](https://github.com/feross/simple-peer)
+
+## 📞 Support
+
+For support, email support@kopa.app or join our community Discord.
+
+---
+
+**Kopa** - Secure, Private, Decentralized Video Conferencing 🎥🔒
