@@ -1,31 +1,28 @@
-"use client";
+"use'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useAppStore } from '@/lib/store';
-import { 
-  Mic, 
-  MicOff, 
-  Video, 
-  VideoOff, 
-  Monitor, 
+import {
+  Video,
+  VideoOff,
+  Mic,
+  MicOff,
+  Monitor,
   MonitorOff,
   Phone,
+  PhoneOff,
+  Settings,
   Users,
-  Circle,
   Square,
   Share,
   MessageCircle,
-  MessageSquare,
   Upload,
   Presentation,
   Send,
   Download,
   X,
-  ChevronLeft,
-  ChevronRight,
   Play,
-  FileText,
-  LogOut,
   Pause,
   SkipBack,
   SkipForward
@@ -146,7 +143,6 @@ export function Room() {
   // Presentation states
   const [presentationSlides, setPresentationSlides] = useState<Array<{id: string, name: string, url: string, type: string}>>([]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
 
   // Media controls state - start with video and mic off by default
@@ -507,11 +503,7 @@ export function Room() {
     }
   };
 
-  const goToSlide = (index: number) => {
-    if (index >= 0 && index < presentationSlides.length) {
-      setCurrentSlideIndex(index);
-    }
-  };
+
 
 
 
@@ -1061,9 +1053,11 @@ export function Room() {
             ) : (
               <div className="h-full flex items-center justify-center p-8">
                 <div className="relative max-w-full max-h-full">
-                  <img
+                  <Image
                     src={presentationSlides[currentSlideIndex].url}
                     alt={`Slide ${currentSlideIndex + 1}`}
+                    width={800}
+                    height={600}
                     className="max-w-full max-h-full object-contain border-4 border-foreground rounded-lg shadow-2xl"
                   />
                   {isPresenting && (
