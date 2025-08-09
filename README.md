@@ -1,8 +1,8 @@
-# Kopa - Web3 Video Conferencing Platform
+# ScreenFlow - Web3 Video Conferencing Platform
 
 A decentralized, privacy-focused video conferencing platform built with Next.js, featuring end-to-end encryption, local data storage, and anonymous mode capabilities.
 
-![Kopa Screenshot](./public/screenshot.png)
+![ScreenFlow Screenshot](./public/screenshot.png)
 
 ## 🚀 Features
 
@@ -47,8 +47,8 @@ A decentralized, privacy-focused video conferencing platform built with Next.js,
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/kopa.git
-cd kopa
+git clone https://github.com/Basezambia/screenflow.git
+cd screenflow
 ```
 
 2. **Install dependencies**
@@ -63,7 +63,7 @@ Create a `.env.local` file in the root directory:
 
 ```bash
 # OnchainKit Configuration
-NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=kopa
+NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME=screenflow
 NEXT_PUBLIC_ONCHAINKIT_API_KEY=your_api_key_here
 NEXT_PUBLIC_URL=http://localhost:3000
 
@@ -120,7 +120,7 @@ Access privacy settings from the home page:
 ## 🏗️ Project Structure
 
 ```
-kopa/
+screenflow/
 ├── app/                    # Next.js app directory
 │   ├── components/         # React components
 │   │   ├── Home.tsx       # Home page with wallet connection
@@ -189,8 +189,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email support@kopa.app or join our community Discord.
+For support, email support@screenflow.app or join our community Discord.
 
 ---
 
-**Kopa** - Secure, Private, Decentralized Video Conferencing 🎥🔒
+**ScreenFlow** - Secure, Private, Decentralized Video Conferencing 🎥🔒
