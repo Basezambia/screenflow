@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Space+Grotesk:wght@400;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Brutalist color palette - stark contrasts */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0%;
+    --input: 0 0% 100%;
+    --ring: 0 0% 0%;
+    --radius: 0rem; /* No rounded corners for brutalist aesthetic */
+    
+    /* Brutalist accent colors */
+    --brutal-yellow: 60 100% 50%;
+    --brutal-red: 0 100% 50%;
+    --brutal-blue: 240 100% 50%;
+    --brutal-green: 120 100% 25%;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100%;
+    --input: 0 0% 0%;
+    --ring: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+  
+  code, pre {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 400;
+  }
+}
+
+/* Brutalist components */
+@layer components {
+  .brutal-shadow {
+    box-shadow: 4px 4px 0px hsl(var(--foreground));
+  }
+  
+  .brutal-shadow-lg {
+    box-shadow: 8px 8px 0px hsl(var(--foreground));
+  }
+  
+  .brutal-border {
+    border: 3px solid hsl(var(--foreground));
+  }
+  
+  .brutal-border-thick {
+    border: 5px solid hsl(var(--foreground));
+  }
+  
+  .brutal-button {
+    @apply brutal-border brutal-shadow;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.1s ease;
+  }
+  
+  .brutal-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px hsl(var(--foreground));
+  }
+  
+  .brutal-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+  }
+  
+  .brutal-card {
+    @apply brutal-border brutal-shadow;
+    background: hsl(var(--card));
+  }
+  
+  .brutal-input {
+    @apply brutal-border;
+    background: hsl(var(--input));
+    font-family: "JetBrains Mono", monospace;
+  }
+  
+  .brutal-accent-yellow {
+    background: hsl(var(--brutal-yellow));
+    color: hsl(var(--foreground));
+  }
+  
+  .brutal-accent-red {
+    background: hsl(var(--brutal-red));
+    color: hsl(var(--background));
+  }
+  
+  .brutal-accent-blue {
+    background: hsl(var(--brutal-blue));
+    color: hsl(var(--background));
+  }
+  
+  .brutal-accent-green {
+    background: hsl(var(--brutal-green));
+    color: hsl(var(--background));
+  }
+}
+
+/* Custom scrollbar - brutalist style */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+  border: 2px solid hsl(var(--foreground));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground));
+  border: none;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Video element styling - no rounded corners */
+video {
+  border: 3px solid hsl(var(--foreground));
+  box-shadow: 4px 4px 0px hsl(var(--foreground));
+}
+
+/* Brutalist loading animation */
+.loading-dots {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.loading-dots::after {
+  content: '...';
+  animation: brutal-blink 1s steps(2, end) infinite;
+}
+
+/* Premium animations for enhanced UI */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+/* Enhanced gradient text animation */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Floating animation for decorative elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes brutal-blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+/* Brutalist selection */
+::selection {
+  background: hsl(var(--brutal-yellow));
+  color: hsl(var(--foreground));
+}
+
+/* Remove all transitions for true brutalist feel */
+* {
+  transition: none !important;
+  animation-duration: 0.1s !important;
+}
