@@ -1,76 +1,123 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import { useAppStore } from '@/lib/store';
+import React, { useState, useEffect, useMemo } from "react";
+import { useAccount } from "wagmi";
+import { useAppStore } from "@/lib/store";
 import {
   ConnectWallet,
   Wallet as WalletComponent,
   WalletDropdown,
   WalletDropdownDisconnect,
 } from "@coinbase/onchainkit/wallet";
+import { Identity, Address, Avatar, EthBalance, Name } from "@coinbase/onchainkit/identity";
 import {
-  Name,
-  Identity,
-  Address,
-  Avatar,
-  EthBalance,
-} from "@coinbase/onchainkit/identity";
-import { 
-  Video, 
-  Users, 
-  Mic, 
-  Plus, 
+  Video,
+  Users,
+  Mic,
+  Plus,
   LogIn,
   Settings,
   History,
   Wallet,
   Copy,
   Check,
-  Share
-} from 'lucide-react';
-import { generateId, generateRoomCode, isValidRoomCode, copyToClipboard } from '@/lib/utils';
-import toast from 'react-hot-toast';
+  Share2,
+  Sparkles,
+  ShieldCheck,
+  AudioLines,
+  GaugeCircle,
+  ArrowRight,
+  ChevronRight,
+  Wifi,
+  Cloud,
+  Lock,
+  Monitor,
+} from "lucide-react";
+import { generateId, generateRoomCode, isValidRoomCode, copyToClipboard } from "@/lib/utils";
+import toast from "react-hot-toast";
+
+const highlights = [
+  {
+    title: "Studio-grade video",
+    description: "Adaptive streaming up to 4K keeps every face sharp, even on the move.",
+    icon: Video,
+  },
+  {
+    title: "Intelligent collaboration",
+    description: "Live co-creation, synchronized notes, and AI summaries in one workspace.",
+    icon: Sparkles,
+  },
+  {
+    title: "Enterprise security",
+    description: "End-to-end encryption with on-chain verifiability and audit trails.",
+    icon: ShieldCheck,
+  },
+];
+
+const featureShowcase = [
+  {
+    title: "Immersive sharing",
+    description: "Share screens, stages, or prototypes with spatial audio and cinematic quality.",
+    icon: Share2,
+    accent: "from-sky-400/60 to-indigo-500/80",
+  },
+  {
+    title: "Sound engineered",
+    description: "Noise-aware mixing keeps every voice crisp with intelligent voice isolation.",
+    icon: AudioLines,
+    accent: "from-purple-500/60 to-pink-500/80",
+  },
+  {
+    title: "Performance insights",
+    description: "Realtime network health and participant analytics for proactive hosting.",
+    icon: GaugeCircle,
+    accent: "from-emerald-400/60 to-teal-500/80",
+  },
+];
 
 export function Home() {
   const { address, isConnected } = useAccount();
-  const { 
-    user, 
-    setUser, 
-    setCurrentRoom, 
-    addRoom, 
+  const {
+    user,
+    setUser,
+    setCurrentRoom,
+    addRoom,
     setActiveView,
     rooms,
     privacySettings,
-    updatePrivacySettings
+    updatePrivacySettings,
   } = useAppStore();
 
-  const [roomName, setRoomName] = useState('');
-  const [joinCode, setJoinCode] = useState('');
+  const [roomName, setRoomName] = useState("");
+  const [joinCode, setJoinCode] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [showFeaturesPage, setShowFeaturesPage] = useState(false);
   const [showSettingsPage, setShowSettingsPage] = useState(false);
 
-  // Initialize user when wallet is connected
   useEffect(() => {
     if (isConnected && address && !user) {
       setUser({
         id: generateId(),
         address,
-        name: `User ${address.slice(-4)}`,
+        name: `Creator ${address.slice(-4)}`,
         isHost: false,
         isMuted: false,
         isVideoEnabled: true,
-        isScreenSharing: false
+        isScreenSharing: false,
       });
     }
   }, [isConnected, address, user, setUser]);
 
+  const totalParticipants = useMemo(
+    () => rooms.reduce((count, room) => count + room.participants.length, 0),
+    [rooms],
+  );
+
   const createRoom = async () => {
     if (!user || !roomName.trim()) {
-      toast.error('Please enter a room name');
+      toast.error("Please name your new space");
       return;
     }
 
@@ -78,33 +125,35 @@ export function Home() {
     try {
       const roomId = generateId();
       const roomCode = generateRoomCode();
-      
+
       const newRoom = {
         id: roomId,
         name: roomName.trim(),
         code: roomCode,
         host: user.id,
-        participants: [{
-          ...user,
-          isHost: true
-        }],
+        participants: [
+          {
+            ...user,
+            isHost: true,
+          },
+        ],
         isRecording: false,
         settings: {
           allowScreenShare: true,
           allowMicrophone: true,
           allowCamera: true,
-          maxParticipants: 10
-        }
+          maxParticipants: 10,
+        },
       };
 
       addRoom(newRoom);
       setCurrentRoom(newRoom);
-      setActiveView('room');
-      
-      toast.success('Room created successfully');
+      setActiveView("room");
+
+      toast.success("Premium room launched ✨");
     } catch (error) {
-      console.error('Error creating room:', error);
-      toast.error('Failed to create room');
+      console.error("Error creating room:", error);
+      toast.error("We couldn't start that room. Try again.");
     } finally {
       setIsCreating(false);
     }
@@ -112,44 +161,42 @@ export function Home() {
 
   const joinRoom = async () => {
     if (!user || !joinCode.trim()) {
-      toast.error('Please enter a room code');
+      toast.error("Enter a room code to continue");
       return;
     }
 
     if (!isValidRoomCode(joinCode.toUpperCase())) {
-      toast.error('Invalid room code format');
+      toast.error("That room code doesn't look right");
       return;
     }
 
     setIsJoining(true);
     try {
-      // In a real app, you would fetch room details from your backend
-      // For now, we'll simulate joining a room
       const roomId = generateId();
-      
+
       const room = {
         id: roomId,
-        name: `Room ${joinCode}`,
+        name: `Session ${joinCode.toUpperCase()}`,
         code: joinCode.toUpperCase(),
-        host: 'other-user',
+        host: "other-user",
         participants: [user],
         isRecording: false,
         settings: {
           allowScreenShare: true,
           allowMicrophone: true,
           allowCamera: true,
-          maxParticipants: 10
-        }
+          maxParticipants: 10,
+        },
       };
 
       addRoom(room);
       setCurrentRoom(room);
-      setActiveView('room');
-      
-      toast.success('Joined room successfully');
+      setActiveView("room");
+
+      toast.success("You're in. Welcome back 👋");
     } catch (error) {
-      console.error('Error joining room:', error);
-      toast.error('Failed to join room');
+      console.error("Error joining room:", error);
+      toast.error("We couldn't find that room. Try again.");
     } finally {
       setIsJoining(false);
     }
@@ -159,46 +206,117 @@ export function Home() {
     const success = await copyToClipboard(code);
     if (success) {
       setCopiedCode(code);
-      toast.success('Room code copied');
+      toast.success("Room code copied");
       setTimeout(() => setCopiedCode(null), 2000);
     } else {
-      toast.error('Failed to copy room code');
+      toast.error("Copy failed. Try manually.");
     }
   };
 
-
-
-  // Show wallet connection page if not connected
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-8">
-        <div className="w-full max-w-lg">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="font-brutal font-black text-5xl uppercase tracking-wider text-foreground mb-6 border-b-8 border-foreground pb-6 inline-block">
-              SCREEN FLOW
-            </h1>
+      <div className="relative min-h-screen overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.35),_transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(236,72,153,0.22),_transparent_55%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/60 backdrop-blur-2xl" />
 
-          </div>
-
-          {/* Wallet Connection Card */}
-          <div className="brutal-card p-12 text-center">
-            <div className="w-20 h-20 bg-brutal-yellow border-5 border-foreground flex items-center justify-center mx-auto mb-8">
-              <Wallet className="w-10 h-10 text-foreground" />
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 py-16">
+          <div className="max-w-4xl text-center">
+            <div className="mx-auto mb-12 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white shadow-xl shadow-indigo-500/20">
+              <Wallet className="h-8 w-8" />
             </div>
-            
-            <h2 className="font-brutal font-black text-3xl uppercase tracking-wider mb-4">
-              CONNECT WALLET
-            </h2>
-            
-            <p className="text-lg text-muted-foreground font-mono uppercase tracking-wide mb-8">
-              SECURE ACCESS TO WEB3 CONFERENCING
+            <h1 className="mx-auto max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Step into premium on-chain collaboration
+            </h1>
+            <p className="mt-6 text-lg leading-relaxed text-slate-300">
+              ScreenFlow delivers elevated video experiences secured by Base. Connect your wallet to unlock cinematic meetings, AI-assisted workflows, and verifiable privacy.
             </p>
 
-            <div className="flex justify-center">
+            <div className="mt-12 flex justify-center">
+              <div className="glass-card inline-flex flex-col items-center gap-4 px-8 py-10 text-left">
+                <p className="text-sm uppercase tracking-[0.2em] text-slate-300/70">Begin in moments</p>
+                <WalletComponent>
+                  <ConnectWallet className="primary-gradient flex items-center gap-3 rounded-full px-8 py-3 text-base font-semibold shadow-lg transition hover:scale-[1.02]">
+                    <span>Connect wallet</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </ConnectWallet>
+                  <WalletDropdown>
+                    <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                      <Avatar />
+                      <Name />
+                      <Address />
+                      <EthBalance />
+                    </Identity>
+                    <WalletDropdownDisconnect />
+                  </WalletDropdown>
+                </WalletComponent>
+              </div>
+            </div>
+
+            <div className="mt-16 grid gap-6 sm:grid-cols-3">
+              {highlights.map(({ icon: Icon, title, description }) => (
+                <div key={title} className="glass-card h-full rounded-2xl px-6 py-8 text-left">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white shadow-inner shadow-indigo-500/20">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-white">{title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">{description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.22),_transparent_55%)]" />
+      <div className="absolute inset-y-0 left-0 h-[520px] w-[520px] -translate-x-1/3 bg-[radial-gradient(circle,_rgba(236,72,153,0.25),_transparent_65%)] blur-3xl" />
+      <div className="absolute inset-y-0 right-0 h-[420px] w-[420px] translate-x-1/4 bg-[radial-gradient(circle,_rgba(56,189,248,0.25),_transparent_65%)] blur-3xl" />
+
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-10 lg:px-12">
+        <header className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-xl space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white shadow-lg shadow-indigo-500/25">
+                <span className="text-xl font-semibold">SF</span>
+              </div>
+              <div>
+                <p className="text-sm uppercase tracking-[0.3em] text-slate-300/70">ScreenFlow</p>
+                <h1 className="mt-1 text-3xl font-semibold text-white sm:text-4xl">
+                  Create signature meeting experiences
+                </h1>
+              </div>
+            </div>
+            <p className="text-base leading-relaxed text-slate-300">
+              Launch curated rooms with cinematic video, spatial audio, and privacy you can verify on-chain. Designed for creators, teams, and communities who expect more from virtual collaboration.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-300/80">
+              <button
+                onClick={() => setShowFeaturesPage(true)}
+                className="group inline-flex items-center gap-2 rounded-full border border-white/10 px-5 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
+              >
+                Explore features
+                <ChevronRight className="h-4 w-4 transition group-hover:translate-x-1" />
+              </button>
+              <button
+                onClick={() => setShowSettingsPage(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-transparent bg-white/10 px-5 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+              >
+                Personalize studio
+                <Settings className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className="glass-card w-full max-w-sm rounded-3xl p-6">
+            <div className="flex items-center justify-between text-sm text-slate-300/80">
+              <span>Connected as</span>
               <WalletComponent>
-                <ConnectWallet className="brutal-button bg-brutal-blue text-white font-brutal font-bold uppercase tracking-wide px-8 py-4 text-lg border-3 border-foreground hover:bg-brutal-blue/80 transition-colors">
-                  CONNECT WALLET
+                <ConnectWallet className="rounded-full bg-white/10 px-4 py-2 text-xs font-medium text-white transition hover:bg-white/20">
+                  <Name className="text-[13px]" />
                 </ConnectWallet>
                 <WalletDropdown>
                   <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
@@ -211,413 +329,368 @@ export function Home() {
                 </WalletDropdown>
               </WalletComponent>
             </div>
-
-            <div className="mt-8 pt-8 border-t-3 border-foreground">
-              <p className="text-sm text-muted-foreground font-mono uppercase tracking-wider">
-                SECURE • DECENTRALIZED • PRIVATE
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-16">
-          <div>
-            <h1 className="font-brutal font-black text-5xl uppercase tracking-wider text-foreground mb-4 border-b-8 border-foreground pb-4 inline-block">
-              SCREEN FLOW
-            </h1>
-            <div className="flex items-center space-x-6 mt-6">
-              <button 
-                onClick={() => setShowFeaturesPage(true)}
-                className="text-xl text-muted-foreground font-mono uppercase tracking-wide hover:text-foreground transition-colors cursor-pointer border-b-2 border-transparent hover:border-foreground"
-              >
-                FEATURES
-              </button>
-              <span className="text-xl text-muted-foreground font-mono">•</span>
-              <button 
-                onClick={() => setShowSettingsPage(true)}
-                className="text-xl text-muted-foreground font-mono uppercase tracking-wide hover:text-foreground transition-colors cursor-pointer border-b-2 border-transparent hover:border-foreground"
-              >
-                SETTINGS
-              </button>
-            </div>
-          </div>
-          
-          {/* User Info & Wallet */}
-          <div className="flex items-center space-x-6">
             {user && (
-              <div className="flex items-center space-x-4 bg-muted border-3 border-foreground px-6 py-3">
-                <div className="w-10 h-10 bg-brutal-yellow border-3 border-foreground flex items-center justify-center">
-                  <span className="text-foreground font-brutal font-black text-lg">
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-lg font-semibold text-white">
                     {user.name.charAt(0).toUpperCase()}
-                  </span>
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-white">{user.name}</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                      {user.address.slice(0, 6)}...{user.address.slice(-4)}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-brutal font-bold text-base uppercase tracking-wide">{user.name}</p>
-                  <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-                    {user.address.slice(0, 6)}...{user.address.slice(-4)}
-                  </p>
+
+                <div className="grid grid-cols-3 gap-3 text-center text-xs text-slate-300/80">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-lg font-semibold text-white">{rooms.length}</p>
+                    <span>Active rooms</span>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-lg font-semibold text-white">{totalParticipants}</p>
+                    <span>Participants</span>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-lg font-semibold text-white">
+                      {privacySettings.endToEndEncryption ? "On" : "Ready"}
+                    </p>
+                    <span>Encryption</span>
+                  </div>
                 </div>
               </div>
             )}
-            
-            <WalletComponent>
-              <ConnectWallet className="brutal-button bg-brutal-blue text-white font-brutal font-bold uppercase tracking-wide px-6 py-3 border-3 border-foreground hover:bg-brutal-blue/80 transition-colors">
-                <Name className="text-inherit" />
-              </ConnectWallet>
-              <WalletDropdown>
-                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar />
-                  <Name />
-                  <Address />
-                  <EthBalance />
-                </Identity>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </WalletComponent>
           </div>
-        </div>
+        </header>
 
-        {/* Main Actions */}
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
-          {/* Create Room */}
-          <div className="brutal-card p-10">
-            <div className="mb-8">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-brutal-green border-3 border-foreground flex items-center justify-center mr-4">
-                  <Plus className="w-6 h-6 text-foreground" />
-                </div>
+        <main className="mt-12 flex flex-1 flex-col gap-12">
+          <section className="grid gap-8 lg:grid-cols-2">
+            <div className="glass-card rounded-3xl p-8">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-brutal font-black text-2xl uppercase tracking-wider">
-                    CREATE ROOM
-                  </h2>
-                  <p className="text-base text-muted-foreground font-mono uppercase tracking-wide">
-                    START NEW CONFERENCE
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-300/70">Launch instantly</p>
+                  <h2 className="mt-3 text-2xl font-semibold text-white">Create a signature room</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                    Name your experience, invite your collaborators, and unlock premium controls tailored for high-stakes conversations.
                   </p>
                 </div>
+                <div className="hidden h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-400/40 text-emerald-200 lg:flex">
+                  <Plus className="h-7 w-7" />
+                </div>
+              </div>
+              <div className="mt-8 space-y-4">
+                <input
+                  className="glass-input w-full rounded-2xl px-5 py-4 text-base"
+                  placeholder="Name your room"
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && createRoom()}
+                />
+                <button
+                  onClick={createRoom}
+                  disabled={isCreating || !roomName.trim()}
+                  className="primary-gradient flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 text-base font-semibold transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCreating ? "Designing your room..." : "Create premium room"}
+                </button>
               </div>
             </div>
-            
-            <div className="space-y-6">
-              <input
-                className="brutal-input w-full text-lg py-4"
-                placeholder="ENTER ROOM NAME"
-                value={roomName}
-                onChange={(e) => setRoomName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && createRoom()}
-              />
-              <button 
-                onClick={createRoom} 
-                disabled={isCreating || !roomName.trim()}
-                className="brutal-button w-full bg-brutal-green disabled:opacity-50 text-lg py-4 font-brutal font-bold uppercase tracking-wide"
-              >
-                {isCreating ? 'CREATING...' : 'CREATE ROOM'}
-              </button>
-            </div>
-          </div>
 
-          {/* Join Room */}
-          <div className="brutal-card p-10">
-            <div className="mb-8">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-brutal-blue border-3 border-foreground flex items-center justify-center mr-4">
-                  <LogIn className="w-6 h-6 text-foreground" />
-                </div>
+            <div className="glass-card rounded-3xl p-8">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="font-brutal font-black text-2xl uppercase tracking-wider">
-                    JOIN ROOM
-                  </h2>
-                  <p className="text-base text-muted-foreground font-mono uppercase tracking-wide">
-                    ENTER ROOM CODE
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-300/70">Rejoin effortlessly</p>
+                  <h2 className="mt-3 text-2xl font-semibold text-white">Enter with an access code</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                    Already invited? Enter the six-character code to jump straight into the experience.
                   </p>
                 </div>
+                <div className="hidden h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/40 text-indigo-200 lg:flex">
+                  <LogIn className="h-7 w-7" />
+                </div>
+              </div>
+              <div className="mt-8 space-y-4">
+                <input
+                  className="glass-input w-full rounded-2xl px-5 py-4 text-base tracking-[0.3em]"
+                  placeholder="ENTER CODE"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  onKeyDown={(e) => e.key === "Enter" && joinRoom()}
+                  maxLength={6}
+                />
+                <button
+                  onClick={joinRoom}
+                  disabled={isJoining || !joinCode.trim()}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-base font-semibold text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isJoining ? "Connecting..." : "Join existing room"}
+                </button>
               </div>
             </div>
-            
-            <div className="space-y-6">
-              <input
-                className="brutal-input w-full text-lg py-4"
-                placeholder="ENTER CODE (ABC123)"
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-                maxLength={6}
-              />
-              <button 
-                onClick={joinRoom} 
-                disabled={isJoining || !joinCode.trim()}
-                className="brutal-button w-full bg-brutal-blue disabled:opacity-50 text-lg py-4 font-brutal font-bold uppercase tracking-wide"
-              >
-                {isJoining ? 'JOINING...' : 'JOIN ROOM'}
-              </button>
-            </div>
-          </div>
-        </div>
+          </section>
 
-        {/* Recent Rooms */}
-        {rooms.length > 0 && (
-          <div className="brutal-card p-brutal-xl mb-brutal-xl">
-            <h2 className="flex items-center font-brutal font-black text-brutal-xl uppercase tracking-wider mb-brutal-lg">
-              <History className="w-6 h-6 mr-brutal bg-brutal-yellow p-1 border-3 border-foreground" />
-              RECENT ROOMS
-            </h2>
-            <div className="space-y-brutal">
-              {rooms.slice(0, 5).map((room) => (
-                <div key={room.id} className="flex items-center justify-between p-brutal-lg bg-muted border-3 border-foreground">
-                  <div>
-                    <h3 className="font-brutal font-bold text-brutal-base uppercase tracking-wide">{room.name}</h3>
-                    <p className="text-brutal-xs text-muted-foreground font-mono uppercase tracking-wider">
-                      {room.participants.length} PARTICIPANT{room.participants.length !== 1 ? 'S' : ''}
-                    </p>
+          <section className="grid gap-6 lg:grid-cols-3">
+            {featureShowcase.map(({ title, description, icon: Icon, accent }) => (
+              <div key={title} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 text-left transition hover:border-white/20">
+                <div className={`absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br ${accent}`} />
+                <div className="relative z-10 space-y-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+                    <Icon className="h-6 w-6" />
                   </div>
-                  <div className="flex items-center space-x-brutal">
-                    <button
-                      className="brutal-button-sm bg-background"
-                      onClick={() => copyRoomCode(room.id.slice(0, 6).toUpperCase())}
-                    >
-                      {copiedCode === room.id.slice(0, 6).toUpperCase() ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </button>
-                    <button
-                      className="brutal-button-sm bg-brutal-green"
-                      onClick={() => {
-                        setCurrentRoom(room);
-                        setActiveView('room');
-                      }}
-                    >
-                      REJOIN
-                    </button>
-                  </div>
+                  <h3 className="text-lg font-semibold text-white">{title}</h3>
+                  <p className="text-sm leading-relaxed text-slate-200/80">{description}</p>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
+            ))}
+          </section>
 
-
-
-
-
-        {/* Features Page Modal */}
-        {showFeaturesPage && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-8 z-50">
-            <div className="bg-background border-5 border-foreground max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              {/* Header */}
-              <div className="p-8 border-b-3 border-foreground bg-brutal-yellow">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-white border-3 border-foreground flex items-center justify-center">
-                      <Video className="w-6 h-6 text-foreground" />
-                    </div>
-                    <div>
-                      <h2 className="font-brutal font-black text-3xl uppercase tracking-wider">FEATURES</h2>
-                      <p className="text-lg text-muted-foreground font-mono uppercase tracking-wide">
-                        PROFESSIONAL VIDEO CONFERENCING PLATFORM
+          {rooms.length > 0 && (
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-300/70">Continue the flow</p>
+                  <h2 className="mt-2 flex items-center gap-3 text-2xl font-semibold text-white">
+                    <History className="h-6 w-6" /> Recent rooms
+                  </h2>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {rooms.slice(0, 6).map((room) => (
+                  <div key={room.id} className="group flex flex-col justify-between rounded-3xl border border-white/10 bg-white/5 p-6 transition hover:border-white/25 hover:bg-white/10">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold text-white">{room.name}</h3>
+                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/80">
+                          {room.code}
+                        </span>
+                      </div>
+                      <p className="text-sm text-slate-300">
+                        {room.participants.length} participant{room.participants.length === 1 ? "" : "s"} • Host: {room.host === user?.id ? "You" : "Verified"}
                       </p>
                     </div>
+                    <div className="mt-6 flex items-center justify-between gap-3 text-sm">
+                      <button
+                        className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-slate-200 transition hover:border-white/30 hover:text-white"
+                        onClick={() => copyRoomCode(room.code)}
+                      >
+                        {copiedCode === room.code ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copiedCode === room.code ? "Copied" : "Copy code"}
+                      </button>
+                      <button
+                        className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-white transition hover:bg-white/20"
+                        onClick={() => {
+                          setCurrentRoom(room);
+                          setActiveView("room");
+                        }}
+                      >
+                        Rejoin
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => setShowFeaturesPage(false)}
-                    className="w-10 h-10 bg-white border-3 border-foreground flex items-center justify-center hover:bg-muted transition-colors"
-                  >
-                    <span className="text-foreground font-bold text-xl">×</span>
-                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+        </main>
+
+        <footer className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-white/10 pt-6 text-sm text-slate-400 lg:flex-row">
+          <p>Built on Base with MiniKit · Elevating digital presence</p>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-300">
+              <Wifi className="h-4 w-4" /> Adaptive bandwidth
+            </div>
+            <div className="flex items-center gap-2 text-slate-300">
+              <Cloud className="h-4 w-4" /> Encrypted archives
+            </div>
+            <div className="flex items-center gap-2 text-slate-300">
+              <Lock className="h-4 w-4" /> Zero-knowledge security
+            </div>
+          </div>
+        </footer>
+      </div>
+
+      {showFeaturesPage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4 py-10">
+          <div className="glass-card relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-3xl p-0">
+            <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-8 py-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-300/70">Premium capabilities</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Everything you need to produce unforgettable sessions</h2>
+              </div>
+              <button
+                onClick={() => setShowFeaturesPage(false)}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="custom-scrollbar space-y-8 overflow-y-auto px-8 py-8">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <div className="flex items-center gap-3 text-white">
+                    <Video className="h-6 w-6" />
+                    <h3 className="text-lg font-semibold">4K adaptive video</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                    Experience cinematic fidelity with bandwidth-aware encoding, auto-framing, and mood lighting enhancements that adapt to every participant.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-slate-200/80">
+                    <li>• Dolby Vision ready streaming</li>
+                    <li>• AI-enhanced light correction</li>
+                    <li>• Smart presenter framing</li>
+                    <li>• Device-aware optimization</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <div className="flex items-center gap-3 text-white">
+                    <Share2 className="h-6 w-6" />
+                    <h3 className="text-lg font-semibold">Immersive screen sharing</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                    Present screens, apps, or prototypes with layered audio routing and synchronized annotations for polished client experiences.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-slate-200/80">
+                    <li>• Multi-source sharing & picture-in-picture</li>
+                    <li>• Spatial audio mix for demos</li>
+                    <li>• Interactive pointer & markup tools</li>
+                    <li>• Secure guest hand-off mode</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <div className="flex items-center gap-3 text-white">
+                    <Mic className="h-6 w-6" />
+                    <h3 className="text-lg font-semibold">Production-grade audio</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                    Intelligent gain control, noise shaping, and studio-grade presets deliver broadcast-ready vocals without post-production.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-slate-200/80">
+                    <li>• AI-powered voice isolation</li>
+                    <li>• Real-time mastering & levels</li>
+                    <li>• Automatic transcription & summaries</li>
+                    <li>• Secure cloud archiving</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <div className="flex items-center gap-3 text-white">
+                    <Users className="h-6 w-6" />
+                    <h3 className="text-lg font-semibold">Collaborative brilliance</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                    Build together with synchronized whiteboards, real-time asset reviews, and workflow automations connected to your stack.
+                  </p>
+                  <ul className="mt-4 space-y-2 text-sm text-slate-200/80">
+                    <li>• Shared moodboards & canvases</li>
+                    <li>• Instant asset approvals</li>
+                    <li>• Integration-ready automations</li>
+                    <li>• AI co-pilot for meeting notes</li>
+                  </ul>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-8">
-                <div className="grid md:grid-cols-2 gap-8 mb-8">
-                  <div className="brutal-card p-6 bg-brutal-yellow">
-                    <div className="flex items-center mb-4">
-                      <Video className="w-8 h-8 text-foreground mr-4" />
-                      <h3 className="font-brutal font-bold text-xl uppercase">HD VIDEO CALLS</h3>
-                    </div>
-                    <p className="font-mono text-sm leading-relaxed mb-4">
-                      Experience crystal-clear video calls with professional quality streaming. Our platform supports up to 4K resolution with adaptive bitrate streaming for optimal performance across all devices.
+              <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-slate-900/80 p-8">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="max-w-xl">
+                    <h3 className="text-xl font-semibold text-white">Decentralized by design</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-200/80">
+                      Built on Base with cryptographic signing, verifiable privacy policies, and granular admin controls. Every interaction is secured by modern web3 standards.
                     </p>
-                    <ul className="font-mono text-xs space-y-2">
-                      <li>• 4K Video Resolution Support</li>
-                      <li>• Adaptive Bitrate Streaming</li>
-                      <li>• Low Latency Communication</li>
-                      <li>• Cross-Platform Compatibility</li>
-                    </ul>
                   </div>
-
-                  <div className="brutal-card p-6 bg-brutal-green">
-                    <div className="flex items-center mb-4">
-                      <Share className="w-8 h-8 text-foreground mr-4" />
-                      <h3 className="font-brutal font-bold text-xl uppercase">SCREEN SHARING</h3>
+                  <div className="grid grid-cols-1 gap-4 text-sm text-white/90 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
+                      <ShieldCheck className="mb-3 h-6 w-6" />
+                      <p className="font-semibold">E2E encryption</p>
+                      <span className="text-xs text-slate-200/80">Zero-trust architecture with verifiable proofs</span>
                     </div>
-                    <p className="font-mono text-sm leading-relaxed mb-4">
-                      Share your entire screen, specific applications, or browser tabs with high-quality audio. Perfect for presentations, demos, and collaborative work sessions.
-                    </p>
-                    <ul className="font-mono text-xs space-y-2">
-                      <li>• Full Screen Sharing</li>
-                      <li>• Application-Specific Sharing</li>
-                      <li>• Audio Capture Support</li>
-                      <li>• Real-time Annotation Tools</li>
-                    </ul>
-                  </div>
-
-                  <div className="brutal-card p-6 bg-brutal-orange">
-                    <div className="flex items-center mb-4">
-                      <Mic className="w-8 h-8 text-foreground mr-4" />
-                      <h3 className="font-brutal font-bold text-xl uppercase">AUDIO RECORDING</h3>
-                    </div>
-                    <p className="font-mono text-sm leading-relaxed mb-4">
-                      Record high-quality audio from your meetings with advanced noise cancellation and echo suppression. Automatic transcription available for easy review.
-                    </p>
-                    <ul className="font-mono text-xs space-y-2">
-                      <li>• High-Quality Audio Recording</li>
-                      <li>• Noise Cancellation</li>
-                      <li>• Automatic Transcription</li>
-                      <li>• Cloud Storage Integration</li>
-                    </ul>
-                  </div>
-
-                  <div className="brutal-card p-6 bg-brutal-blue">
-                    <div className="flex items-center mb-4">
-                      <Users className="w-8 h-8 text-foreground mr-4" />
-                      <h3 className="font-brutal font-bold text-xl uppercase">COLLABORATION</h3>
-                    </div>
-                    <p className="font-mono text-sm leading-relaxed mb-4">
-                      Real-time collaboration tools including whiteboard, file sharing, and synchronized presentations. Work together seamlessly from anywhere in the world.
-                    </p>
-                    <ul className="font-mono text-xs space-y-2">
-                      <li>• Interactive Whiteboard</li>
-                      <li>• File Sharing & Transfer</li>
-                      <li>• Synchronized Presentations</li>
-                      <li>• Real-time Chat</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="brutal-card p-6 bg-muted">
-                  <h3 className="font-brutal font-bold text-xl uppercase mb-4">DECENTRALIZED ARCHITECTURE</h3>
-                  <p className="font-mono text-sm leading-relaxed mb-4">
-                    Built on blockchain technology for enhanced security, privacy, and decentralization. Your data remains under your control with end-to-end encryption and peer-to-peer communication.
-                  </p>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-brutal-yellow border-3 border-foreground flex items-center justify-center mx-auto mb-2">
-                        <span className="font-brutal font-black">🔒</span>
-                      </div>
-                      <p className="font-mono text-xs uppercase">END-TO-END ENCRYPTION</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-brutal-green border-3 border-foreground flex items-center justify-center mx-auto mb-2">
-                        <span className="font-brutal font-black">🌐</span>
-                      </div>
-                      <p className="font-mono text-xs uppercase">PEER-TO-PEER NETWORK</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-brutal-blue border-3 border-foreground flex items-center justify-center mx-auto mb-2">
-                        <span className="font-brutal font-black">⛓️</span>
-                      </div>
-                      <p className="font-mono text-xs uppercase">BLOCKCHAIN POWERED</p>
+                    <div className="rounded-2xl border border-white/20 bg-white/10 p-4">
+                      <Monitor className="mb-3 h-6 w-6" />
+                      <p className="font-semibold">Observability suite</p>
+                      <span className="text-xs text-slate-200/80">Live diagnostics, sentiment, and engagement scoring</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Settings Page Modal */}
-        {showSettingsPage && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-8 z-50">
-            <div className="bg-background border-5 border-foreground max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              {/* Header */}
-              <div className="p-8 border-b-3 border-foreground bg-brutal-blue">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-white border-3 border-foreground flex items-center justify-center">
-                      <Settings className="w-6 h-6 text-foreground" />
-                    </div>
-                    <div>
-                      <h2 className="font-brutal font-black text-3xl uppercase tracking-wider">SETTINGS</h2>
-                      <p className="text-lg text-muted-foreground font-mono uppercase tracking-wide">
-                        CONFIGURE YOUR EXPERIENCE
-                      </p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowSettingsPage(false)}
-                    className="w-10 h-10 bg-white border-3 border-foreground flex items-center justify-center hover:bg-muted transition-colors"
-                  >
-                    <span className="text-foreground font-bold text-xl">×</span>
-                  </button>
-                </div>
+      {showSettingsPage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md px-4 py-10">
+          <div className="glass-card relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-3xl p-0">
+            <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-8 py-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-300/70">Studio preferences</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Tailor the experience to your flow</h2>
               </div>
+              <button
+                onClick={() => setShowSettingsPage(false)}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+              >
+                ×
+              </button>
+            </div>
 
-              {/* Content */}
-              <div className="p-8 space-y-8">
-                {/* Audio Settings */}
-                <div className="brutal-card p-6">
-                  <h3 className="font-brutal font-bold text-xl uppercase mb-4 flex items-center">
-                    <Mic className="w-6 h-6 mr-3" />
-                    AUDIO SETTINGS
+            <div className="custom-scrollbar space-y-8 overflow-y-auto px-8 py-8">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
+                    <Mic className="h-5 w-5" /> Audio routing
                   </h3>
-                  <div className="space-y-4">
+                  <div className="mt-4 space-y-4 text-sm text-slate-200/80">
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Microphone</label>
-                      <select className="brutal-input w-64">
-                        <option>Default Microphone</option>
-                        <option>Built-in Microphone</option>
-                        <option>External USB Microphone</option>
+                      <span>Microphone</span>
+                      <select className="glass-input w-40 rounded-xl px-4 py-2 text-sm">
+                        <option>Studio USB</option>
+                        <option>Built-in Mic</option>
+                        <option>Wireless Lavalier</option>
                       </select>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Speakers</label>
-                      <select className="brutal-input w-64">
-                        <option>Default Speakers</option>
-                        <option>Built-in Speakers</option>
-                        <option>Headphones</option>
+                      <span>Speakers</span>
+                      <select className="glass-input w-40 rounded-xl px-4 py-2 text-sm">
+                        <option>Spatial Mix</option>
+                        <option>Built-in Output</option>
+                        <option>Studio Monitors</option>
                       </select>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Noise Cancellation</label>
-                      <button className="brutal-button-sm bg-brutal-green">ENABLED</button>
+                      <span>Noise shaping</span>
+                      <button className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white">Enabled</button>
                     </div>
                   </div>
                 </div>
 
-                {/* Video Settings */}
-                <div className="brutal-card p-6">
-                  <h3 className="font-brutal font-bold text-xl uppercase mb-4 flex items-center">
-                    <Video className="w-6 h-6 mr-3" />
-                    VIDEO SETTINGS
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
+                    <Video className="h-5 w-5" /> Visual staging
                   </h3>
-                  <div className="space-y-4">
+                  <div className="mt-4 space-y-4 text-sm text-slate-200/80">
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Camera</label>
-                      <select className="brutal-input w-64">
+                      <span>Camera</span>
+                      <select className="glass-input w-40 rounded-xl px-4 py-2 text-sm">
                         <option>Default Camera</option>
-                        <option>Built-in Camera</option>
+                        <option>Mirrorless HDMI</option>
                         <option>External Webcam</option>
                       </select>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Resolution</label>
-                      <select className="brutal-input w-64">
-                        <option>1080p HD</option>
-                        <option>720p</option>
-                        <option>4K Ultra HD</option>
+                      <span>Resolution</span>
+                      <select className="glass-input w-40 rounded-xl px-4 py-2 text-sm">
+                        <option>1080p Studio</option>
+                        <option>720p Balanced</option>
+                        <option>4K Master</option>
                       </select>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Frame Rate</label>
-                      <select className="brutal-input w-64">
+                      <span>Frame rate</span>
+                      <select className="glass-input w-40 rounded-xl px-4 py-2 text-sm">
                         <option>30 FPS</option>
                         <option>60 FPS</option>
                         <option>24 FPS</option>
@@ -626,77 +699,89 @@ export function Home() {
                   </div>
                 </div>
 
-                {/* Privacy Settings */}
-                <div className="brutal-card p-6">
-                  <h3 className="font-brutal font-bold text-xl uppercase mb-4 flex items-center">
-                    <span className="w-6 h-6 mr-3 flex items-center justify-center">🔒</span>
-                    PRIVACY SETTINGS
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
+                    <Lock className="h-5 w-5" /> Privacy controls
                   </h3>
-                  <div className="space-y-4">
+                  <div className="mt-4 space-y-4 text-sm text-slate-200/80">
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">End-to-End Encryption</label>
-                      <button 
+                      <span>End-to-end encryption</span>
+                      <button
                         onClick={() => updatePrivacySettings({ endToEndEncryption: !privacySettings.endToEndEncryption })}
-                        className={`brutal-button-sm ${privacySettings.endToEndEncryption ? 'bg-brutal-green' : 'bg-muted'}`}
+                        className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] transition ${
+                          privacySettings.endToEndEncryption
+                            ? "bg-emerald-400/20 text-emerald-200"
+                            : "bg-white/10 text-white"
+                        }`}
                       >
-                        {privacySettings.endToEndEncryption ? 'ENABLED' : 'DISABLED'}
+                        {privacySettings.endToEndEncryption ? "Enabled" : "Disabled"}
                       </button>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Data Storage</label>
-                      <select 
-                        className="brutal-input w-64"
-                        value={privacySettings.dataStorage === 'local' ? 'Local Only' : 'Encrypted Cloud'}
-                        onChange={(e) => updatePrivacySettings({ 
-                          dataStorage: e.target.value === 'Local Only' ? 'local' : 'encrypted-cloud' 
-                        })}
+                      <span>Data storage</span>
+                      <select
+                        className="glass-input w-44 rounded-xl px-4 py-2 text-sm"
+                        value={privacySettings.dataStorage === "local" ? "Local only" : "Encrypted cloud"}
+                        onChange={(e) =>
+                          updatePrivacySettings({
+                            dataStorage: e.target.value === "Local only" ? "local" : "encrypted-cloud",
+                          })
+                        }
                       >
-                        <option>Local Only</option>
-                        <option>Encrypted Cloud</option>
+                        <option>Local only</option>
+                        <option>Encrypted cloud</option>
                       </select>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Anonymous Mode</label>
-                      <button 
+                      <span>Anonymous mode</span>
+                      <button
                         onClick={() => updatePrivacySettings({ anonymousMode: !privacySettings.anonymousMode })}
-                        className={`brutal-button-sm ${privacySettings.anonymousMode ? 'bg-brutal-green' : 'bg-muted'}`}
+                        className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] transition ${
+                          privacySettings.anonymousMode
+                            ? "bg-indigo-400/20 text-indigo-200"
+                            : "bg-white/10 text-white"
+                        }`}
                       >
-                        {privacySettings.anonymousMode ? 'ENABLED' : 'DISABLED'}
+                        {privacySettings.anonymousMode ? "Enabled" : "Disabled"}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Network Settings */}
-                <div className="brutal-card p-6">
-                  <h3 className="font-brutal font-bold text-xl uppercase mb-4 flex items-center">
-                    <span className="w-6 h-6 mr-3 flex items-center justify-center">🌐</span>
-                    NETWORK SETTINGS
+                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                  <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
+                    <Wifi className="h-5 w-5" /> Network finesse
                   </h3>
-                  <div className="space-y-4">
+                  <div className="mt-4 space-y-4 text-sm text-slate-200/80">
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Connection Type</label>
-                      <select className="brutal-input w-64">
-                        <option>Peer-to-Peer</option>
-                        <option>Relay Server</option>
-                        <option>Hybrid</option>
+                      <span>Connection mode</span>
+                      <select className="glass-input w-44 rounded-xl px-4 py-2 text-sm">
+                        <option>Peer-to-peer</option>
+                        <option>Relay optimized</option>
+                        <option>Hybrid smart</option>
                       </select>
                     </div>
                     <div className="flex items-center justify-between">
-                      <label className="font-mono text-sm uppercase">Bandwidth Limit</label>
-                      <select className="brutal-input w-64">
+                      <span>Bandwidth profile</span>
+                      <select className="glass-input w-44 rounded-xl px-4 py-2 text-sm">
                         <option>Unlimited</option>
-                        <option>10 Mbps</option>
-                        <option>5 Mbps</option>
+                        <option>High fidelity</option>
+                        <option>Data saver</option>
                       </select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Diagnostics overlay</span>
+                      <button className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white">
+                        Live metrics
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
